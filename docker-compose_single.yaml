@@ -1,0 +1,48 @@
+#version: '3.8'
+#services:
+#  node1:
+#    image: clickhouse/clickhouse-server:25.3
+#    hostname: node1
+#    ports:
+#      - "8123:8123"   # HTTP
+#      - "19000:9000"   # TCP
+#      - "2181:2181"   # Keeper
+#    volumes:
+#      - D:\docker_data\ck_cluster\node1\data:/var/lib/clickhouse
+#    networks:
+#      ch_net:
+#
+#  node2:
+#    image: clickhouse/clickhouse-server:25.3
+#    hostname: node2
+#    ports:
+#      - "8124:8123"   # 错开端口
+#      - "19001:9000"
+#      - "2182:2181"
+#    volumes:
+#      - D:\docker_data\ck_cluster\node2\data:/var/lib/clickhouse
+#
+#    networks:
+#      ch_net:
+#
+#  node3:
+#    image: clickhouse/clickhouse-server:25.3
+#    hostname: node3
+#    ports:
+#      - "8125:8123"
+#      - "19002:9000"
+#      - "2183:2181"
+#    volumes:
+#      - D:\docker_data\ck_cluster\node3\data:/var/lib/clickhouse
+#    networks:
+#      ch_net:
+#
+#volumes:
+#  node1-data:
+#  node2-data:
+#  node3-data:
+#
+#networks:
+#  ch_net:
+#    driver: bridge  # 关键！确保容器间按主机名通信
+#

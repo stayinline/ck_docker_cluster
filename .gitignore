@@ -1,0 +1,4 @@
+# 在项目根目录创建或编辑 .gitignore 文件
+node1/data/
+node2/data/
+node3/data/

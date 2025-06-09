@@ -1,0 +1,90 @@
+version: '3.8'
+services:
+  node1:
+    image: clickhouse/clickhouse-server:25.3
+    hostname: node1
+    ports:
+      - "8123:8123"   # HTTP
+      - "19000:9000"   # TCP
+      - "9181:9181"   # Keeper
+      - "29234:9234"
+    volumes:
+      - D:\docker_data\ck_cluster\node1\config:/etc/clickhouse-server
+      - D:\docker_data\ck_cluster\node1\data:/var/lib/clickhouse
+      - D:\docker_data\ck_cluster\node1\config\keeper_config.xml:/etc/clickhouse-server/config.d/keeper_config.xml
+    #      - D:\docker_data\ck_cluster\node1\logs:/var/log/clickhouse-server
+    #      - D:\docker_data\ck_cluster\node1\user_files:/var/lib/clickhouse/user_files
+    #      - D:\docker_data\ck_cluster\node1\format_schemas:/var/lib/clickhouse/format_schemas
+    #      - D:\docker_data\ck_cluster\node1\tmp:/var/lib/clickhouse/tmp
+    networks:
+      ch_net:
+#    command: >
+#      bash -c "
+#        chown -R root:root /etc/clickhouse-keeper
+#      "
+    user: root  # 以root用户运行容器
+  #    command: ["chown", "-R", "clickhouse:clickhouse", "/var/lib/clickhouse", "/var/log/clickhouse-server"]
+
+
+  node2:
+    image: clickhouse/clickhouse-server:25.3
+    hostname: node2
+    ports:
+      - "8124:8123"   # 错开端口
+      - "19001:9000"
+      - "9182:9181"
+      - "29235:9234"
+
+    volumes:
+      - D:\docker_data\ck_cluster\node2\config:/etc/clickhouse-server
+      - D:\docker_data\ck_cluster\node2\data:/var/lib/clickhouse
+      - D:\docker_data\ck_cluster\node2\config\keeper_config.xml:/etc/clickhouse-server/config.d/keeper_config.xml
+
+    #      - D:\docker_data\ck_cluster\node2\logs:/var/log/clickhouse-server
+    #      - D:\docker_data\ck_cluster\node2\user_files:/var/lib/clickhouse/user_files
+    #      - D:\docker_data\ck_cluster\node2\format_schemas:/var/lib/clickhouse/format_schemas
+    #      - D:\docker_data\ck_cluster\node2\tmp:/var/lib/clickhouse/tmp
+    networks:
+      ch_net:
+  #    command: [ "chown", "-R", "clickhouse:clickhouse", "/var/lib/clickhouse", "/var/log/clickhouse-server" ]
+#    command: >
+#      bash -c "
+#        chown -R root:root /etc/clickhouse-keeper
+#      "
+    user: root  # 以root用户运行容器
+
+  node3:
+    image: clickhouse/clickhouse-server:25.3
+    hostname: node3
+    ports:
+      - "8125:8123"
+      - "19002:9000"
+      - "9183:9181"
+      - "29236:9234"
+
+    volumes:
+      - D:\docker_data\ck_cluster\node3\config:/etc/clickhouse-server
+      - D:\docker_data\ck_cluster\node3\data:/var/lib/clickhouse
+      - D:\docker_data\ck_cluster\node3\config\keeper_config.xml:/etc/clickhouse-server/config.d/keeper_config.xml
+    #      - D:\docker_data\ck_cluster\node3\logs:/var/log/clickhouse-server
+    #      - D:\docker_data\ck_cluster\node3\user_files:/var/lib/clickhouse/user_files
+    #      - D:\docker_data\ck_cluster\node3\format_schemas:/var/lib/clickhouse/format_schemas
+    #      - D:\docker_data\ck_cluster\node3\tmp:/var/lib/clickhouse/tmp
+    networks:
+      ch_net:
+#    command: [ "chown", "-R", "clickhouse:clickhouse", "/var/lib/clickhouse", "/var/log/clickhouse-server" ]
+#    command: >
+#      bash -c "
+#        chown -R root:root /etc/clickhouse-keeper
+#      "
+    user: root  # 以root用户运行容器
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
+
+networks:
+  ch_net:
+    driver: bridge  # 关键！确保容器间按主机名通信
+
