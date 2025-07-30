@@ -10,7 +10,8 @@ services:
       - "29234:9234"
     volumes:
       - D:\docker_data\ck_cluster\node1\config:/etc/clickhouse-server
-      - D:\docker_data\ck_cluster\node1\data:/var/lib/clickhouse
+#      - D:\docker_data\ck_cluster\node1\data:/var/lib/clickhouse
+      - /var/lib/clickhouse
       - D:\docker_data\ck_cluster\node1\config\keeper_config.xml:/etc/clickhouse-server/config.d/keeper_config.xml
     #      - D:\docker_data\ck_cluster\node1\logs:/var/log/clickhouse-server
     #      - D:\docker_data\ck_cluster\node1\user_files:/var/lib/clickhouse/user_files
@@ -37,7 +38,8 @@ services:
 
     volumes:
       - D:\docker_data\ck_cluster\node2\config:/etc/clickhouse-server
-      - D:\docker_data\ck_cluster\node2\data:/var/lib/clickhouse
+#      - D:\docker_data\ck_cluster\node2\data:/var/lib/clickhouse
+      - /var/lib/clickhouse
       - D:\docker_data\ck_cluster\node2\config\keeper_config.xml:/etc/clickhouse-server/config.d/keeper_config.xml
 
     #      - D:\docker_data\ck_cluster\node2\logs:/var/log/clickhouse-server
@@ -64,7 +66,8 @@ services:
 
     volumes:
       - D:\docker_data\ck_cluster\node3\config:/etc/clickhouse-server
-      - D:\docker_data\ck_cluster\node3\data:/var/lib/clickhouse
+      - /var/lib/clickhouse
+#      - D:\docker_data\ck_cluster\node3\data:/var/lib/clickhouse
       - D:\docker_data\ck_cluster\node3\config\keeper_config.xml:/etc/clickhouse-server/config.d/keeper_config.xml
     #      - D:\docker_data\ck_cluster\node3\logs:/var/log/clickhouse-server
     #      - D:\docker_data\ck_cluster\node3\user_files:/var/lib/clickhouse/user_files

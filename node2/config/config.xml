@@ -5,6 +5,13 @@
    or add <skip_check_for_incorrect_settings>1</skip_check_for_incorrect_settings> here.
 -->
 <clickhouse>
+
+    <remote_servers_internal_default_user>
+        <default>default</default>
+        <password>admin_password</password>
+    </remote_servers_internal_default_user>
+
+
     <zookeeper>
         <node>
             <host>node1</host>
@@ -25,24 +32,31 @@
         <ch_cluster>
             <shard>
                 <internal_replication>true</internal_replication>
+                <!--意思指让分布式表选择第一个健康的副本，向其中写入数据，然后其他的副本自己异步复制-->
+
                 <replica>
                     <host>node1</host>
                     <port>9000</port>
+                    <user>default</user>
+                    <password>admin_password</password>
                 </replica>
+                <replica>
+                    <host>node3</host>
+                    <port>9000</port>
+                    <user>default</user>
+                    <password>admin_password</password>
+                </replica>
+                <!-- node1和node3互为副本-->
             </shard>
             <shard>
                 <internal_replication>true</internal_replication>
                 <replica>
                     <host>node2</host>
                     <port>9000</port>
+                    <user>default</user>
+                    <password>admin_password</password>
                 </replica>
-            </shard>
-            <shard>
-                <internal_replication>true</internal_replication>
-                <replica>
-                    <host>node3</host>
-                    <port>9000</port>
-                </replica>
+                <!--  node2没有副本-->
             </shard>
         </ch_cluster>
     </remote_servers>
@@ -1050,17 +1064,24 @@
 
          See https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication/#creating-replicated-tables
       -->
-    <!--
+
     <macros>
-        <shard>01</shard>
-        <replica>example01-01-1</replica>
+        <shard>shard_2</shard>
+        <replica>replica_1</replica>
     </macros>
-    -->
+
 
     <!--
     <default_replica_path>/clickhouse/tables/{database}/{table}</default_replica_path>
     <default_replica_name>{replica}</default_replica_name>
     -->
+    <default_replica_path>/clickhouse/tables/{shard}/{database}/{table}</default_replica_path>
+    <default_replica_name>{replica}</default_replica_name>
+
+    <remote_servers_internal_default_user>
+        <default>default</default>
+        <password>admin_password</password>
+    </remote_servers_internal_default_user>
 
     <!-- Replica group name for database Replicated.
           The cluster created by Replicated database will consist of replicas in the same group.

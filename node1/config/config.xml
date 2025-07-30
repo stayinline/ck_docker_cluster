@@ -6,33 +6,46 @@
 -->
 <clickhouse>
 
+    <remote_servers_internal_default_user>
+        <default>default</default>
+        <password>admin_password</password>
+    </remote_servers_internal_default_user>
 
     <!-- 集群定义（无需ZK） -->
     <remote_servers>
         <ch_cluster>
             <shard>
                 <internal_replication>true</internal_replication>
+                <!--意思指让分布式表选择第一个健康的副本，向其中写入数据，然后其他的副本自己异步复制-->
+
                 <replica>
                     <host>node1</host>
                     <port>9000</port>
+                    <user>default</user>
+                    <password>admin_password</password>
                 </replica>
+                <replica>
+                    <host>node3</host>
+                    <port>9000</port>
+                    <user>default</user>
+                    <password>admin_password</password>
+                </replica>
+                <!-- node1和node3互为副本-->
             </shard>
             <shard>
                 <internal_replication>true</internal_replication>
                 <replica>
                     <host>node2</host>
                     <port>9000</port>
+                    <user>default</user>
+                    <password>admin_password</password>
                 </replica>
-            </shard>
-            <shard>
-                <internal_replication>true</internal_replication>
-                <replica>
-                    <host>node3</host>
-                    <port>9000</port>
-                </replica>
+                <!--  node2没有副本-->
             </shard>
         </ch_cluster>
     </remote_servers>
+
+    <!--  通过这个标签，告诉clickhouse-server节点，ClickHouse-Keepeer在哪里，否则server连接不上ClickHouse-Keepeer集群-->
     <zookeeper>
         <node>
             <host>node1</host>
@@ -51,15 +64,15 @@
     <!-- 监听所有IP -->
     <listen_host>0.0.0.0</listen_host>
     <!-- 在config.xml的<clickhouse>标签内添加 -->
-<!--    <tmp_path>/var/lib/clickhouse/tmp/</tmp_path>-->
-<!--    <user_files_path>/var/lib/clickhouse/user_files/</user_files_path>-->
-<!--    <format_schema_path>/var/lib/clickhouse/format_schemas/</format_schema_path>-->
+    <!--    <tmp_path>/var/lib/clickhouse/tmp/</tmp_path>-->
+    <!--    <user_files_path>/var/lib/clickhouse/user_files/</user_files_path>-->
+    <!--    <format_schema_path>/var/lib/clickhouse/format_schemas/</format_schema_path>-->
 
-<!--    <user_directories>-->
-<!--        <users_xml>-->
-<!--            <path>/etc/clickhouse-server/users.xml</path>-->
-<!--        </users_xml>-->
-<!--    </user_directories>-->
+    <!--    <user_directories>-->
+    <!--        <users_xml>-->
+    <!--            <path>/etc/clickhouse-server/users.xml</path>-->
+    <!--        </users_xml>-->
+    <!--    </user_directories>-->
 
     <logger>
         <!-- Possible levels [1]:
@@ -178,7 +191,8 @@
         </header>
         <header>
             <name>Access-Control-Allow-Headers</name>
-            <value>origin, x-requested-with, x-clickhouse-format, x-clickhouse-user, x-clickhouse-key, Authorization</value>
+            <value>origin, x-requested-with, x-clickhouse-format, x-clickhouse-user, x-clickhouse-key, Authorization
+            </value>
         </header>
         <header>
             <name>Access-Control-Allow-Methods</name>
@@ -991,21 +1005,21 @@
         If this section is not present in configuration, all hosts are allowed.
     -->
     <!--<remote_url_allow_hosts>-->
-        <!-- Host should be specified exactly as in URL. The name is checked before DNS resolution.
-            Example: "clickhouse.com", "clickhouse.com." and "www.clickhouse.com" are different hosts.
-                    If port is explicitly specified in URL, the host:port is checked as a whole.
-                    If host specified here without port, any port with this host allowed.
-                    "clickhouse.com" -> "clickhouse.com:443", "clickhouse.com:80" etc. is allowed, but "clickhouse.com:80" -> only "clickhouse.com:80" is allowed.
-            If the host is specified as IP address, it is checked as specified in URL. Example: "[2a02:6b8:a::a]".
-            If there are redirects and support for redirects is enabled, every redirect (the Location field) is checked.
-            Host should be specified using the host xml tag:
-                    <host>clickhouse.com</host>
-        -->
+    <!-- Host should be specified exactly as in URL. The name is checked before DNS resolution.
+        Example: "clickhouse.com", "clickhouse.com." and "www.clickhouse.com" are different hosts.
+                If port is explicitly specified in URL, the host:port is checked as a whole.
+                If host specified here without port, any port with this host allowed.
+                "clickhouse.com" -> "clickhouse.com:443", "clickhouse.com:80" etc. is allowed, but "clickhouse.com:80" -> only "clickhouse.com:80" is allowed.
+        If the host is specified as IP address, it is checked as specified in URL. Example: "[2a02:6b8:a::a]".
+        If there are redirects and support for redirects is enabled, every redirect (the Location field) is checked.
+        Host should be specified using the host xml tag:
+                <host>clickhouse.com</host>
+    -->
 
-        <!-- Regular expression can be specified. RE2 engine is used for regexps.
-            Regexps are not aligned: don't forget to add ^ and $. Also don't forget to escape dot (.) metacharacter
-            (forgetting to do so is a common source of error).
-        -->
+    <!-- Regular expression can be specified. RE2 engine is used for regexps.
+        Regexps are not aligned: don't forget to add ^ and $. Also don't forget to escape dot (.) metacharacter
+        (forgetting to do so is a common source of error).
+    -->
     <!--</remote_url_allow_hosts>-->
 
     <!-- The list of HTTP headers forbidden to use in HTTP-related storage engines and table functions.
@@ -1051,17 +1065,22 @@
 
          See https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication/#creating-replicated-tables
       -->
-    <!--
     <macros>
-        <shard>01</shard>
-        <replica>example01-01-1</replica>
+        <shard>shard_1</shard>
+        <replica>replica_1</replica>
     </macros>
-    -->
 
     <!--
     <default_replica_path>/clickhouse/tables/{database}/{table}</default_replica_path>
     <default_replica_name>{replica}</default_replica_name>
     -->
+    <default_replica_path>/clickhouse/tables/{shard}/{database}/{table}</default_replica_path>
+    <default_replica_name>{replica}</default_replica_name>
+
+    <remote_servers_internal_default_user>
+        <default>default</default>
+        <password>admin_password</password>
+    </remote_servers_internal_default_user>
 
     <!-- Replica group name for database Replicated.
           The cluster created by Replicated database will consist of replicas in the same group.
@@ -1359,7 +1378,7 @@
         <database>system</database>
         <table>crash_log</table>
 
-        <partition_by />
+        <partition_by/>
         <flush_interval_milliseconds>1000</flush_interval_milliseconds>
         <max_size_rows>1024</max_size_rows>
         <reserved_size_rows>1024</reserved_size_rows>
@@ -1535,23 +1554,23 @@
     -->
     <encryption_codecs>
         <!-- aes_128_gcm_siv -->
-            <!-- Example of getting hex key from env -->
-            <!-- the code should use this key and throw an exception if its length is not 16 bytes -->
-            <!--key_hex from_env="..."></key_hex -->
+        <!-- Example of getting hex key from env -->
+        <!-- the code should use this key and throw an exception if its length is not 16 bytes -->
+        <!--key_hex from_env="..."></key_hex -->
 
-            <!-- Example of multiple hex keys. They can be imported from env or be written down in config-->
-            <!-- the code should use these keys and throw an exception if their length is not 16 bytes -->
-            <!-- key_hex id="0">...</key_hex -->
-            <!-- key_hex id="1" from_env=".."></key_hex -->
-            <!-- key_hex id="2">...</key_hex -->
-            <!-- current_key_id>2</current_key_id -->
+        <!-- Example of multiple hex keys. They can be imported from env or be written down in config-->
+        <!-- the code should use these keys and throw an exception if their length is not 16 bytes -->
+        <!-- key_hex id="0">...</key_hex -->
+        <!-- key_hex id="1" from_env=".."></key_hex -->
+        <!-- key_hex id="2">...</key_hex -->
+        <!-- current_key_id>2</current_key_id -->
 
-            <!-- Example of getting hex key from config -->
-            <!-- the code should use this key and throw an exception if its length is not 16 bytes -->
-            <!-- key>...</key -->
+        <!-- Example of getting hex key from config -->
+        <!-- the code should use this key and throw an exception if its length is not 16 bytes -->
+        <!-- key>...</key -->
 
-            <!-- example of adding nonce -->
-            <!-- nonce>...</nonce -->
+        <!-- example of adding nonce -->
+        <!-- nonce>...</nonce -->
 
         <!-- /aes_128_gcm_siv -->
     </encryption_codecs>
@@ -1791,39 +1810,39 @@
     -->
 
     <!-- <kafka> -->
-        <!-- Global configuration properties -->
-        <!--
-        NOTE: statistics should be consumed, otherwise it creates too much
-              entries in the queue, that leads to memory leak and slow shutdown.
-        default value: 0
-        <statistics_interval_ms>3000</statistics_interval_ms>
-        -->
+    <!-- Global configuration properties -->
+    <!--
+    NOTE: statistics should be consumed, otherwise it creates too much
+          entries in the queue, that leads to memory leak and slow shutdown.
+    default value: 0
+    <statistics_interval_ms>3000</statistics_interval_ms>
+    -->
 
-        <!-- Topic configuration properties -->
-        <!--
+    <!-- Topic configuration properties -->
+    <!--
+    <kafka_topic>
+          <name>football</name>
+          <request_timeout_ms>6000</request_timeout_ms>
+    </kafka_topic>
+    -->
+
+    <!-- Producer configuration -->
+    <!--
+    <producer>
+        <compression_codec>gzip</compression_codec>
         <kafka_topic>
-              <name>football</name>
-              <request_timeout_ms>6000</request_timeout_ms>
+            <name>football</name>
+            <request_timeout_ms>6000</request_timeout_ms>
         </kafka_topic>
-        -->
+    </producer>
+    -->
 
-        <!-- Producer configuration -->
-        <!--
-        <producer>
-            <compression_codec>gzip</compression_codec>
-            <kafka_topic>
-                <name>football</name>
-                <request_timeout_ms>6000</request_timeout_ms>
-            </kafka_topic>
-        </producer>
-        -->
-
-        <!-- Consumer configuration -->
-        <!--
-        <consumer>
-            <enable_auto_commit>true</enable_auto_commit>
-        </consumer>
-        -->
+    <!-- Consumer configuration -->
+    <!--
+    <consumer>
+        <enable_auto_commit>true</enable_auto_commit>
+    </consumer>
+    -->
     <!-- </kafka> -->
 
     <!-- Note: ClickHouse Cloud https://clickhouse.com/cloud provides automatic backups to object storage. -->

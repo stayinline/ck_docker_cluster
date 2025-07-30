@@ -12,6 +12,7 @@
             <raft_logs_level>warning</raft_logs_level>
         </coordination_settings>
 
+<!--  配置全量的ClickHouse-Keepeer集群节点信息，用于ClickHouse-Keepeer的内部通信-->
         <raft_configuration>
             <server>
                 <id>1</id>
